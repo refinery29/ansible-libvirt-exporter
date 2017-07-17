@@ -8,4 +8,4 @@ Type=simple
 User=nobody
 Group=libvirtd
 
-ExecStart={{ libvirt_exporter_install_path }}/libvirt_exporter
+ExecStart={{ libvirt_exporter_install_path }}/libvirt_exporter -web.listen-address=:{{ libvirt_exporter_port }}

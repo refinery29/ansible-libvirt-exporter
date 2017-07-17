@@ -8,3 +8,4 @@ libvirt_exporter_git_url: https://github.com/kumina/libvirt_exporter.git
 libvirt_exporter_src_path: "{{libvirt_exporter_workdir}}/libvirt_exporter"
 libvirt_exporter_git_version: master
 libvirt_exporter_install_path: /usr/local/bin
+libvirt_exporter_port: 9177
