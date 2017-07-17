@@ -1,0 +1,10 @@
+---
+libvirt_exporter_download_path: /tmp
+libvirt_exporter_workdir: "{{ libvirt_exporter_download_path }}/libvirt_exporter_workdir"
+libvirt_exporter_goroot: "{{ libvirt_exporter_workdir }}/go"
+libvirt_exporter_gopath: "{{ libvirt_exporter_workdir }}/gopath"
+libvirt_exporter_go_version:   1.6.2
+libvirt_exporter_git_url: https://github.com/kumina/libvirt_exporter.git
+libvirt_exporter_src_path: "{{libvirt_exporter_workdir}}/libvirt_exporter"
+libvirt_exporter_git_version: master
+libvirt_exporter_install_path: /usr/local/bin

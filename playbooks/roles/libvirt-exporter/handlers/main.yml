@@ -1,0 +1,7 @@
+---
+- name: restart and enable libvirt_exporter
+  systemd:
+    name: libvirt_exporter
+    daemon_reload: yes
+    state: restarted
+    enabled: true

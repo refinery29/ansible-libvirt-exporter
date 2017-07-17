@@ -1,0 +1,65 @@
+---
+- name: install dependencies for installation of components from source
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - git
+    - gzip
+    - curl
+    - gcc
+    - pkg-config
+    - build-essential
+    - libvirt-dev
+
+- name: set internal variables for convenience
+  set_fact:
+    libvirt_exporter_golang_tarball_url: "https://storage.googleapis.com/golang/go{{ libvirt_exporter_go_version }}.linux-amd64.tar.gz"
+    #libvirt_exporter_golang_tarball_url: "http://golang.org/dl/go{{ libvirt_exporter_go_version }}.linux-amd64.tar.gz"
+  when: ansible_userspace_bits == "64"
+
+- name: set internal variables for convenience
+  set_fact:
+    libvirt_exporter_golang_tarball_url: "https://storage.googleapis.com/golang/go{{ libvirt_exporter_go_version }}.linux-386.tar.gz"
+    #libvirt_exporter_golang_tarball_url: "http://golang.org/dl/go{{ libvirt_exporter_go_version }}.linux-386.tar.gz"
+  when: ansible_userspace_bits == "32"
+
+- name: mkdir for Golang
+  file: path={{ item }}  state=directory
+  with_items:
+    - "{{ libvirt_exporter_goroot }}"
+    - "{{ libvirt_exporter_gopath }}"
+
+- name: download and untar Golang tarball
+  unarchive:
+    src:  "{{ libvirt_exporter_golang_tarball_url }}"
+    dest: "{{ libvirt_exporter_workdir }}"
+    copy: no
+    creates: "{{ libvirt_exporter_goroot }}/bin/go"
+
+- name: clone the node_exporter project src
+  git:
+    repo: "{{ libvirt_exporter_git_url }}"
+    dest: "{{ libvirt_exporter_src_path }}"
+    version: "{{ libvirt_exporter_git_version }}"
+    force: yes
+
+- name: build node_exporter source code
+  shell: go get && go build
+  args:
+    chdir: "{{ libvirt_exporter_src_path }}"
+    creates: node_exporter
+  environment:
+    GOROOT: "{{ libvirt_exporter_goroot }}"
+    GOPATH: "{{ libvirt_exporter_gopath }}"
+    GOBIN: "{{ libvirt_exporter_goroot }}/bin"
+    PATH: "{{ ansible_env.PATH }}:{{ libvirt_exporter_goroot }}/bin:{{ libvirt_exporter_gopath }}/bin"
+
+- name: copy the built node_exporter to the install path
+  command:
+    cp {{ libvirt_exporter_src_path }}/libvirt_exporter {{ libvirt_exporter_install_path }}
+    creates={{ libvirt_exporter_install_path }}/libvirt_exporter
+
+- name: install systemd service file from template
+  template:
+    src=lib/systemd/system/libvirt_exporter.service
+    dest=/lib/systemd/system/libvirt_exporter.service
+  notify: restart and enable libvirt_exporter

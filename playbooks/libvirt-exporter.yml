@@ -1,0 +1,9 @@
+---
+- hosts: libvirt-exporter
+  pre_tasks:
+    - name: install libvirt-bin
+      apt:
+        name=libvirt-bin
+        state=present
+  roles:
+    - libvirt-exporter
